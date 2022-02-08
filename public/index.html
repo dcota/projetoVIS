@@ -28,7 +28,39 @@ shape-rendering: crispEdges;
 .axis text {
 fill: #2b2929;
 font-family: Georgia;
-font-size: 120%;
+font-size: 100%;
+}
+
+.line {
+    fill: none;
+    stroke: #ffab00;
+    stroke-width: 1;
+}
+  
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+/* Style the dots by assigning a fill and stroke */
+.dot {
+    fill: #ffab00;
+    stroke: #fff;
+}
+  
+  .focus circle {
+  fill: none;
+  stroke: steelblue;
+}
+.tooltip {
+fill: #2b2929;
+font-family: Georgia;
+font-size: 150%;
+}
+
+.point {
+stroke: none;
+fill: #9c9c9c;
 }
 
     </style>
@@ -85,9 +117,9 @@ font-size: 120%;
 <script >
   const margin = {
       top: 10,
-      right: 20,
-      bottom: 30,
-      left: 30
+      right: 50,
+      bottom: 50,
+      left: 50
   };
    
   // Dimensions: 400 x 400
@@ -123,12 +155,11 @@ font-size: 120%;
             .append('g').
         attr('transform', `translate(${margin.left}, ${margin.top})`);
     
-    /**/
     const xScale = d3.scaleLinear().range([0,width]);
     const yScale = d3.scaleLinear().range([height, 0]);
 
     xScale.domain([0,800]);
-    yScale.domain([0,30]);
+    yScale.domain([20,30]);
 
     const yaxis = d3.axisLeft().scale(yScale); 
     const xaxis = d3.axisBottom().scale(xScale);
@@ -144,17 +175,103 @@ font-size: 120%;
 
 
     var line = d3.line()
-      .x(d => x(d.Time))
-      .y(d => y(d.temp))
+    .x(function(d, i) { return xScale(d.Time); }) // set the x values for the line generator
+    .y(function(d) { return yScale(d.temp); }) // set the y values for the line generator 
+    .curve(d3.curveMonotoneX) // apply smoothing to the line
+    
+    //add line
+    svg.append("path")
+    .datum(data) // 10. Binds data to the line 
+    .attr("class", "line") // Assign a class for styling 
+    .attr("d", line); // 11. Calls the line generator 
+
+    const area = d3
+    .area()
+    .x(data => xScale(data.Time))
+    .y0(height)
+    .y1(data => yScale(data.temp));
+
+    svg
+  .append("path")
+  .attr("transform", `translate(0,0)`)
+  .datum(data)
+  .style("fill", "lightblue")
+  .attr("stroke", "steelblue")
+  .attr("stroke-linejoin", "round")
+  .attr("stroke-linecap", "round")
+  .attr("stroke-width", 1)
+  .attr("d", area);
+
+  svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin.left)
+      .attr("x",0 - (height / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .style("font-size","10px")
+      .text("Temperatura (C)");
+  
+  svg.append("text")             
+      .attr("transform",
+            "translate(" + (width/2) + " ," + 
+                           (height + margin.top + 20) + ")")
+      .style("text-anchor", "middle")
+      .style("font-size","10px")
+      .text("Tempo (s)");
+
+  var bisect = d3.bisector(d => d.Time).left;
+
+  //tooltip
+
+  var focus = svg
+    .append('g')
+    .append('circle')
+      .style("fill", "skyblue")
+      .attr("stroke", "black")
+      .attr('r', 2)
+      .style("opacity", 0)
+  
+  var focusText = svg
+    .append('g')
+    .append('text') 
+      .style("opacity", 0)
+      .attr("text-anchor", "left")
+      .attr("alignment-baseline", "middle")
 
 
+      svg
+    .append('rect')
+    .style("fill", "none")
+    .style("pointer-events", "all")
+    .attr('width', width)
+    .attr('height', height)
+    .on('mouseover', mouseover)
+    .on('mousemove', mousemove)
+    .on('mouseout', mouseout);
 
+    function mouseover() {
+    focus.style("opacity", 1)
+    focusText.style("opacity",1)
+  }
+  function mousemove() {
+    // recover coordinate we need
+    var x0 = xScale.invert(d3.mouse(this)[0]);
+    var i = bisect(data, x0, 1);
+    selectedData = data[i]
+    focus
+      .attr("cx", xScale(selectedData.Time))
+      .attr("cy", yScale(selectedData.temp))
+    focusText
+      .html("Time:" + selectedData.Time + "  :  " + "temp:" + selectedData.temp)
+      .attr("x", xScale(selectedData.Time))
+      .attr("y", yScale(selectedData.temp))
+      .style("font-size","10px")
+    }
+  function mouseout() {
+    focus.style("opacity", 0)
+    focusText.style("opacity", 0)
+  }
 
-
-
-
-
-    /**/
   function responsivefy(svg) {
       // Container is the DOM element, svg is appended.
       // Then we measure the container and find its
