@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualização de informação</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+    crossorigin="anonymous"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="scripts.js"></script>
+
+</head>
+
+<body>
+  <div class="container cb">
+    <div class="p-4">
+      <h1 class="text-center">CanSat2021 - Análise de dados</h1>
+    </div>
+    <div class="row">
+      <div class="col-sm-3">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="flexRadioDefault" id="temp">
+          <label class="form-check-label" for="flexRadioDefault1">
+            Temperatura do ar (t)
+          </label>
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="flexRadioDefault" id="press">
+          <label class="form-check-label" for="flexRadioDefault1">
+            Pressão atmosférica (t)
+          </label>
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="flexRadioDefault" id="alt">
+          <label class="form-check-label" for="flexRadioDefault1">
+            Altitude (t)
+          </label>
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <label for="exampleFormControlInput1" class="form-label">Escolha o valor mínimo do tempo:</label>
+        <input type="email" class="form-control" id="valmin" placeholder="valor mínimo" value="0">    
+      </div>
+
+    </div>
+
+    <div class="mt-5" id="card">
+      <svg id="vis" width = 1200 height="500"></svg>
+ 
+    </div>
+  </div>
+
+
+</body>
+
+</html>
+
+<script>
+  /*import {getMinTemp, getMaxTemp} from './scripts.js'*/
+
+  let valmin = document.getElementById('valmin')
+  let t = document.getElementById('temp')
+  let p = document.getElementById('press')
+  let a = document.getElementById('alt')
+  document.getElementById('card').style.display = 'none'
+  t.addEventListener('change', () => {
+    if (t.checked) {
+      document.getElementById('card').style.display = 'block'
+      tempVis()
+    }
+  })
+  p.addEventListener('change', () => {
+    if (p.checked) {
+      document.getElementById('card').style.display = 'block'
+      pressVis()
+    }
+  })
+  a.addEventListener('change', () => {
+    if (a.checked) {
+      document.getElementById('card').style.display = 'block'
+      altVis()
+    }
+  })
+  valmin.addEventListener('change', () => {
+      tempVis()
+  })
+  
+
+
+  let data = convertJson('data.json', (dataConverted) => {
+    data = dataConverted
+    console.log(data)
+  })
+
+  function convertJson(file, callback) {
+    var data = d3.json('data.json', (data) => {
+      callback(data)
+    })
+  }
+
+  function tempVis() {
+    let XMAX = data[0+data.length-1].Time
+    //let XMIN = data[0].Time
+    let XMIN = parseInt(valmin.value)
+    let MAXTEMP = 0
+    let MINTEMP = 0
+
+    getMaxTemp(temp, (maxValue) => {
+      MAXTEMP = maxValue + 1
+    })
+
+    getMinTemp(temp, (minValue) => {
+      MINTEMP = minValue - 1
+    })
+
+    var vis = d3.select("#vis"),
+      WIDTH = 1200,
+      HEIGHT = 500,
+      MARGINS = {
+        top: 20,
+        right: 20,
+        bottom: 20,
+        left: 50
+      }
+    xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([XMIN, XMAX]),
+      yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([MINTEMP, MAXTEMP])
+
+    //xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([XMIN, XMAX]),
+    //yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([0, 40])
+    //xScale2 = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([XMIN, XMAX]),
+    //yScale2 = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([0, 1025]),
+
+    xAxis = d3.svg.axis()
+      .scale(xScale),
+
+    yAxis = d3.svg.axis()
+      .scale(yScale)
+      .orient("left");
+
+    d3.select('svg').selectAll('*').remove();
+
+    vis.append("svg:g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + (HEIGHT - MARGINS.bottom) + ")")
+      .call(xAxis);
+
+    vis.append("svg:g")
+      .attr("class", "y axis")
+      .attr("transform", "translate(" + (MARGINS.left) + ",0)")
+      .call(yAxis);
+
+    var lineGen = d3.svg.line()
+      .x(function (d) {
+        return xScale(d.Time);
+      })
+      .y(function (d) {
+        return yScale(d.temp);
+      })
+      .interpolate("basis");
+
+    vis.append('svg:path')
+      .attr('d', lineGen(data))
+      .attr('stroke', 'green')
+      .style("stroke-dasharray", ("4, 4"))
+      .attr('stroke-width', 2)
+      .attr('fill', 'none');
+      
+
+    /*vis.append('svg:path')
+      .attr('d', lineGen2(data))
+      .attr('stroke', 'blue')
+      .attr('stroke-width', 2)
+      .attr('fill', 'none');*/
+
+  }
+
+  function pressVis() {
+    let XMAX = data[0+data.length-1].Time
+    let XMIN = data[0].Time
+    let MAXPRESS = 0
+    let MINPRESS = 0
+
+    getMaxPress(press, (maxValue) => {
+      MAXPRESS = maxValue + 10
+    })
+    console.log(MAXPRESS)
+
+    getMinPress(press, (minValue) => {
+      MINPRESS = minValue - 10
+    })
+    console.log(MINPRESS)
+
+    var vis = d3.select("#vis"),
+      WIDTH = 1200,
+      HEIGHT = 500,
+      MARGINS = {
+        top: 20,
+        right: 20,
+        bottom: 20,
+        left: 80
+      }
+    xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([XMIN, XMAX]),
+    yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([MINPRESS, MAXPRESS])
+
+    //xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([XMIN, XMAX]),
+    //yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([0, 40])
+    //xScale2 = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([XMIN, XMAX]),
+    //yScale2 = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([0, 1025]),
+
+    xAxis = d3.svg.axis()
+      .scale(xScale)
+
+
+    yAxis = d3.svg.axis()
+      .scale(yScale)
+      .orient("left");
+
+    d3.select('svg').selectAll('*').remove();
+
+    vis.append("svg:g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + (HEIGHT - MARGINS.bottom) + ")")
+      .call(xAxis);
+
+   
+
+    vis.append("svg:g")
+      .attr("class", "y axis")
+      .attr("transform", "translate(" + (MARGINS.left) + ",0)")
+      .call(yAxis);
+
+    var lineGen = d3.svg.line()
+      .x(function (d) {
+        return xScale(d.Time);
+      })
+      .y(function (d) {
+        return yScale(d.press);
+      })
+      .interpolate("basis");
+
+    vis.append('svg:path')
+      .attr('d', lineGen(data))
+      .attr('stroke', 'green')
+      .attr('stroke-width', 2)
+      .attr('fill', 'none')
+      
+      vis.append('svg:text')
+      .attr("transform", "rotate(-90)")
+        .attr("y", MARGINS.left -70)
+        .attr("x", 0 - (HEIGHT / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Pressão atmosférica (hPa)");
+
+      vis.append('svg:text')
+      .attr("transform", "rotate(-90)")
+        .attr("y", MARGINS.left -70)
+        .attr("x", 0 - (HEIGHT / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Pressão atmosférica (hPa)");
+
+    /*vis.append('svg:path')
+      .attr('d', lineGen2(data))
+      .attr('stroke', 'blue')
+      .attr('stroke-width', 2)
+      .attr('fill', 'none');*/
+
+  }
+
+  function altVis() {
+    let XMAX = data[0+data.length-1].Time
+    let XMIN = data[0].Time
+    let MAXALT = 0
+    let MINALT = 0
+
+    getMaxAlt(alt, (maxValue) => {
+      MAXALT = maxValue + 50
+    })
+    console.log(MAXALT)
+
+    getMinAlt(alt, (minValue) => {
+      MINALT = minValue
+    })
+    console.log(MINALT)
+
+    var vis = d3.select("#vis"),
+      WIDTH = 1200,
+      HEIGHT = 500,
+      MARGINS = {
+        top: 20,
+        right: 20,
+        bottom: 20,
+        left: 50
+      }
+    xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([XMIN, XMAX]),
+      yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([MINALT, MAXALT])
+
+    //xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([XMIN, XMAX]),
+    //yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([0, 40])
+    //xScale2 = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([XMIN, XMAX]),
+    //yScale2 = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([0, 1025]),
+
+    xAxis = d3.svg.axis()
+      .scale(xScale),
+
+      yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient("left");
+    d3.select('svg').selectAll('*').remove();
+    vis.append("svg:g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + (HEIGHT - MARGINS.bottom) + ")")
+      .call(xAxis);
+
+    vis.append("svg:g")
+      .attr("class", "y axis")
+      .attr("transform", "translate(" + (MARGINS.left) + ",0)")
+      .call(yAxis);
+
+    var lineGen = d3.svg.line()
+      .x(function (d) {
+        return xScale(d.Time);
+      })
+      .y(function (d) {
+        return yScale(d.h);
+      })
+      .interpolate("basis");
+
+    vis.append('svg:path')
+      .attr('d', lineGen(data))
+      .attr('stroke', 'green')
+      .attr('stroke-width', 2)
+      .attr('fill', 'none');
+
+    /*vis.append('svg:path')
+      .attr('d', lineGen2(data))
+      .attr('stroke', 'blue')
+      .attr('stroke-width', 2)
+      .attr('fill', 'none');*/
+
+  }
+
+</script>
+
+<style>
+  .axis path {
+    fill: none;
+    stroke: #777;
+    shape-rendering: crispEdges;
+  }
+
+  .axis text {
+    font-family: Lato;
+    font-size: 13px;
+  }
+</style>

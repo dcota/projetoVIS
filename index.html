@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualização de informação</title>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+</head>
+
+<body>
+  <div class="d"></div>
+
+</body>
+
+</html>
+
+<script>
+
+  let dataArray = [20, 40, 50, 60];
+
+  let width = 500;
+  let height = 500;
+
+  let widthScale = d3.scale.linear()
+                  .domain([0,60])
+                  .range([0, width]);
+
+  let colorScale = d3.scale.linear()
+                  .domain([0,60])
+                  .range(['red', 'blue']);
+
+  let canvas = d3.select('.d')
+    .append('svg')
+    .attr('width', width)
+    .attr('height', height);
+
+  let bars = canvas.selectAll('rect')
+              .data(dataArray)
+              .enter()
+                .append('rect')
+                .attr('width', (d)=>{
+                  return widthScale(d)
+                })
+                .attr('height', (d) => {
+                  return 50
+                })
+                .attr('fill', (d) => {
+                  return colorScale(d)
+                })
+                .attr('y', (d, i) => {
+                  return i * 100
+                });
+
+</script>
