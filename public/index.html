@@ -98,14 +98,21 @@ fill: #9c9c9c;
           </label>
         </div>
       </div>
-      <div class="col-sm-3">
-        <label for="exampleFormControlInput1" class="form-label">Escolha o valor mínimo do tempo:</label>
+      
+    </div>
+    <div class="row">
+      <div class="col-sm-3 mt-2">
+        <label for="exampleFormControlInput1" class="form-label">Tmin:</label>
         <input type="email" class="form-control" id="valmin" placeholder="valor mínimo" value="0">    
       </div>
-
+      <div class="col-sm-3 mt-2">
+        <label for="exampleFormControlInput1" class="form-label">Tmax:</label>
+        <input type="email" class="form-control" id="valmax" placeholder="valor mínimo" value="800">    
+      </div>
     </div>
-
-    <div class="shadow p-3 mb-5 bg-body rounded mt-4" id="chart"></div>
+    <div class="shadow p-3 mb-5 bg-body rounded mt-4" id="chart">
+      <!--vis here-->
+    </div>
   </div>
     
   
@@ -226,7 +233,7 @@ fill: #9c9c9c;
   var focus = svg
     .append('g')
     .append('circle')
-      .style("fill", "skyblue")
+      .style("fill", "red")
       .attr("stroke", "black")
       .attr('r', 2)
       .style("opacity", 0)
@@ -239,7 +246,7 @@ fill: #9c9c9c;
       .attr("alignment-baseline", "middle")
 
 
-      svg
+    svg
     .append('rect')
     .style("fill", "none")
     .style("pointer-events", "all")
@@ -253,6 +260,8 @@ fill: #9c9c9c;
     focus.style("opacity", 1)
     focusText.style("opacity",1)
   }
+
+  
   function mousemove() {
     // recover coordinate we need
     var x0 = xScale.invert(d3.mouse(this)[0]);
@@ -262,11 +271,19 @@ fill: #9c9c9c;
       .attr("cx", xScale(selectedData.Time))
       .attr("cy", yScale(selectedData.temp))
     focusText
-      .html("Time:" + selectedData.Time + "  :  " + "temp:" + selectedData.temp)
-      .attr("x", xScale(selectedData.Time))
+      .html(selectedData.temp)
+      .attr("x", xScale(selectedData.Time)+5)
       .attr("y", yScale(selectedData.temp))
-      .style("font-size","10px")
+      .style("font-size","8px")
     }
+
+    /*'<a href= "http://google.com">' + // The first <a> tag
+         formatTime(d.date) +
+         "</a>" +                          // closing </a> tag
+         "<br/>"  + d.close)     
+         .style("left", (d3.event.pageX) + "px")             
+         .style("top", (d3.event.pageY - 28) + "px");*/
+
   function mouseout() {
     focus.style("opacity", 0)
     focusText.style("opacity", 0)
