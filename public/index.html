@@ -7,7 +7,8 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
     crossorigin="anonymous"></script>
-    <script src='https://d3js.org/d3.v5.min.js'></script> 
+    <script src='https://d3js.org/d3.v5.min.js'></script>
+    <script src="vistemp.js"></script>
     <style>
         /* AXES */
 /* ticks */
@@ -114,31 +115,25 @@ fill: #9c9c9c;
       <!--vis here-->
     </div>
   </div>
-    
-  
-    
 </body>
-  
 </html>
 
-<script >
+<script>
   const margin = {
       top: 10,
       right: 50,
       bottom: 50,
       left: 50
   };
-   
-  // Dimensions: 400 x 400
-  // used for the initial rendering
-  // width to height proportion
-  // its preserved as the chart is resized
   const width = 600 - margin.left - margin.right;
   const height = 300 - margin.top - margin.bottom;
 
-  //const data = [15, 33, 20, 90, 10, 55, 60, 75, 58, 12];
-
-  
+  let valmin = document.getElementById('valmin')
+  let valmax = document.getElementById('valmax')
+  let t = document.getElementById('temp')
+  let p = document.getElementById('press')
+  let a = document.getElementById('alt')
+  document.getElementById('chart').style.display = 'none'
 
   function convertJson(file, callback) {
     d3.json(file)
@@ -154,166 +149,168 @@ fill: #9c9c9c;
     console.log(data)
     console.log(data.length)
 
-    const svg = d3.select('#chart').
-        append('svg').
-        attr('width', width + margin.left + margin.right).
-        attr('height', height + margin.top + margin.bottom).
-        call(responsivefy) // Call responsivefy to make the chart responsive
-            .append('g').
-        attr('transform', `translate(${margin.left}, ${margin.top})`);
-    
-    const xScale = d3.scaleLinear().range([0,width]);
-    const yScale = d3.scaleLinear().range([height, 0]);
+    t.addEventListener('change', () => {
+      if (t.checked) {
+        document.getElementById('chart').style.display = 'block'
+        tempVis(data,valmin,valmax)
+        valmin.addEventListener('change', () => {
+          tempVis(data,valmin,valmax)
+        })
+        valmax.addEventListener('change', () => {
+          tempVis(data,valmin,valmax)
+        })
 
-    xScale.domain([0,800]);
-    yScale.domain([20,30]);
+      /*MAXTEMP = 0
+      getMaxTemp(data, (maxValue) => {
+        MAXTEMP = maxValue + 1
+      })
 
-    const yaxis = d3.axisLeft().scale(yScale); 
-    const xaxis = d3.axisBottom().scale(xScale);
+      console.log(MAXTEMP)
 
-    svg.append("g")
-    .attr("class", "axis")
-    .attr("transform", "translate(0," + height + ")")
-    .call(xaxis);
+      const svg = d3.select('#chart')
+        .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .call(responsivefy) // Call responsivefy to make the chart responsive
+        .append('g')
+        .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-    svg.append("g")
-    .attr("class", "axis")
-    .call(yaxis);
+      const xScale = d3.scaleLinear().range([0,width]);
+      const yScale = d3.scaleLinear().range([height, 0]);
 
+      xScale.domain([0,800]);
+      yScale.domain([20,30]);
 
-    var line = d3.line()
-    .x(function(d, i) { return xScale(d.Time); }) // set the x values for the line generator
-    .y(function(d) { return yScale(d.temp); }) // set the y values for the line generator 
-    .curve(d3.curveMonotoneX) // apply smoothing to the line
-    
-    //add line
-    svg.append("path")
-    .datum(data) // 10. Binds data to the line 
-    .attr("class", "line") // Assign a class for styling 
-    .attr("d", line); // 11. Calls the line generator 
+      const yaxis = d3.axisLeft().scale(yScale); 
+      const xaxis = d3.axisBottom().scale(xScale);
 
-    const area = d3
-    .area()
-    .x(data => xScale(data.Time))
-    .y0(height)
-    .y1(data => yScale(data.temp));
+      svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xaxis);
 
-    svg
-  .append("path")
-  .attr("transform", `translate(0,0)`)
-  .datum(data)
-  .style("fill", "lightblue")
-  .attr("stroke", "steelblue")
-  .attr("stroke-linejoin", "round")
-  .attr("stroke-linecap", "round")
-  .attr("stroke-width", 1)
-  .attr("d", area);
-
-  svg.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 0 - margin.left)
-      .attr("x",0 - (height / 2))
-      .attr("dy", "1em")
-      .style("text-anchor", "middle")
-      .style("font-size","10px")
-      .text("Temperatura (C)");
-  
-  svg.append("text")             
-      .attr("transform",
-            "translate(" + (width/2) + " ," + 
-                           (height + margin.top + 20) + ")")
-      .style("text-anchor", "middle")
-      .style("font-size","10px")
-      .text("Tempo (s)");
-
-  var bisect = d3.bisector(d => d.Time).left;
-
-  //tooltip
-
-  var focus = svg
-    .append('g')
-    .append('circle')
-      .style("fill", "red")
-      .attr("stroke", "black")
-      .attr('r', 2)
-      .style("opacity", 0)
-  
-  var focusText = svg
-    .append('g')
-    .append('text') 
-      .style("opacity", 0)
-      .attr("text-anchor", "left")
-      .attr("alignment-baseline", "middle")
+      svg.append("g")
+        .attr("class", "axis")
+        .call(yaxis);
 
 
-    svg
-    .append('rect')
-    .style("fill", "none")
-    .style("pointer-events", "all")
-    .attr('width', width)
-    .attr('height', height)
-    .on('mouseover', mouseover)
-    .on('mousemove', mousemove)
-    .on('mouseout', mouseout);
+      var line = d3.line()
+        .x(function(d, i) { return xScale(d.Time); }) // set the x values for the line generator
+        .y(function(d) { return yScale(d.temp); }) // set the y values for the line generator 
+        .curve(d3.curveMonotoneX) // apply smoothing to the line
 
-    function mouseover() {
-    focus.style("opacity", 1)
-    focusText.style("opacity",1)
-  }
+      //add line
+      svg.append("path")
+        .datum(data) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling 
+        .attr("d", line); // 11. Calls the line generator 
 
-  
-  function mousemove() {
-    // recover coordinate we need
-    var x0 = xScale.invert(d3.mouse(this)[0]);
-    var i = bisect(data, x0, 1);
-    selectedData = data[i]
-    focus
-      .attr("cx", xScale(selectedData.Time))
-      .attr("cy", yScale(selectedData.temp))
-    focusText
-      .html(selectedData.temp)
-      .attr("x", xScale(selectedData.Time)+5)
-      .attr("y", yScale(selectedData.temp))
-      .style("font-size","8px")
-    }
+      const area = d3
+        .area()
+        .x(data => xScale(data.Time))
+        .y0(height)
+        .y1(data => yScale(data.temp));
 
-    /*'<a href= "http://google.com">' + // The first <a> tag
-         formatTime(d.date) +
-         "</a>" +                          // closing </a> tag
-         "<br/>"  + d.close)     
-         .style("left", (d3.event.pageX) + "px")             
-         .style("top", (d3.event.pageY - 28) + "px");*/
+      svg
+        .append("path")
+        .attr("transform", `translate(0,0)`)
+        .datum(data)
+        .style("fill", "lightblue")
+        .attr("stroke", "steelblue")
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .attr("stroke-width", 1)
+        .attr("d", area);
 
-  function mouseout() {
-    focus.style("opacity", 0)
-    focusText.style("opacity", 0)
-  }
+      svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left)
+        .attr("x",0 - (height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .style("font-size","10px")
+        .text("Temperatura (C)");
 
-  function responsivefy(svg) {
-      // Container is the DOM element, svg is appended.
-      // Then we measure the container and find its
-      // aspect ratio.
-      const container = d3.select(svg.node().parentNode),
-          width = parseInt(svg.style('width'), 10),
-          height = parseInt(svg.style('height'), 10),
-          aspect = width / height;
-           
-      // Add viewBox attribute to set the value to initial size
-      // add preserveAspectRatio attribute to specify how to scale
-      // and call resize so that svg resizes on page load
-      svg.attr('viewBox', `0 0 ${width} ${height}`).
-      attr('preserveAspectRatio', 'xMinYMid').
-      call(resize);
-       
-      d3.select(window).on('resize.' + container.attr('id'), resize);
+      svg.append("text")             
+        .attr("transform", "translate(" + (width/2) + " ," + (height + margin.top + 20) + ")")
+        .style("text-anchor", "middle")
+        .style("font-size","10px")
+        .text("Tempo (s)");
 
-      function resize() {
-          const targetWidth = parseInt(container.style('width'));
-          svg.attr('width', targetWidth);
-          svg.attr('height', Math.round(targetWidth / aspect));
+      var bisect = d3.bisector(d => d.Time).left;
+
+      //tooltip
+
+      var focus = svg
+        .append('g')
+        .append('circle')
+        .style("fill", "red")
+        .attr("stroke", "black")
+        .attr('r', 2)
+        .style("opacity", 0)
+
+      var focusText = svg
+        .append('g')
+        .append('text') 
+        .style("opacity", 0)
+        .attr("text-anchor", "left")
+        .attr("alignment-baseline", "middle")
+
+
+      svg
+        .append('rect')
+        .style("fill", "none")
+        .style("pointer-events", "all")
+        .attr('width', width)
+        .attr('height', height)
+        .on('mouseover', mouseover)
+        .on('mousemove', mousemove)
+        .on('mouseout', mouseout);
+
+      function mouseover() {
+        focus.style("opacity", 1)
+        focusText.style("opacity",1)
       }
-  }
 
+
+      function mousemove() {
+      // recover coordinate we need
+      var x0 = xScale.invert(d3.mouse(this)[0]);
+      var i = bisect(data, x0, 1);
+      selectedData = data[i]
+      focus
+        .attr("cx", xScale(selectedData.Time))
+        .attr("cy", yScale(selectedData.temp))
+      focusText
+        .html(selectedData.temp)
+        .attr("x", xScale(selectedData.Time)+5)
+        .attr("y", yScale(selectedData.temp))
+        .style("font-size","8px")
+      }
+
+      function mouseout() {
+      focus.style("opacity", 0)
+      focusText.style("opacity", 0)
+      }
+
+      function responsivefy(svg) {
+      const container = d3.select(svg.node().parentNode),
+        width = parseInt(svg.style('width'), 10),
+        height = parseInt(svg.style('height'), 10),
+        aspect = width / height;
+        svg.attr('viewBox', `0 0 ${width} ${height}`).
+        attr('preserveAspectRatio', 'xMinYMid').
+        call(resize); 
+        d3.select(window).on('resize.' + container.attr('id'), resize);
+        function resize() {
+            const targetWidth = parseInt(container.style('width'));
+            svg.attr('width', targetWidth);
+            svg.attr('height', Math.round(targetWidth / aspect));
+        }
+      }*/
+              
+            }
+          })
   })
    
    
