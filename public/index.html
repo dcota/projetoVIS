@@ -145,20 +145,14 @@ fill: #9c9c9c;
     })
   }
 
-  convertJson('data.json',(data) => {
+  convertJson('data1.json',(data) => {
     console.log(data)
     console.log(data.length)
 
     t.addEventListener('change', () => {
       if (t.checked) {
         document.getElementById('chart').style.display = 'block'
-        tempVis(data,valmin,valmax)
-        valmin.addEventListener('change', () => {
-          tempVis(data,valmin,valmax)
-        })
-        valmax.addEventListener('change', () => {
-          tempVis(data,valmin,valmax)
-        })
+        tempVis(data)
 
       /*MAXTEMP = 0
       getMaxTemp(data, (maxValue) => {

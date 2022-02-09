@@ -17,35 +17,11 @@ function getMinTemp(data, callback) {
 }
 
 
-function parseData(data, valmin, valmax, callback){
-    console.log('data')
-    let array=[];
-    console.log(valmin)
-    for (let i = valmin; i  <valmax ; i++){
-        console.log('entra')
-        console.log(data[i])
-        array.push(data[i])
-    }
-    callback(array)
-}
-
-function tempVis(data,valmin,valmax) {
-    let XMIN = 0
-    let XMAX = 0
-    XMIN = parseInt(valmin.value)
-    XMAX = parseInt(valmax.value)
-    let parsedData;
-    parseData(data, XMIN, XMAX, (array)=>{
-       parsedData=array
-    })
-
+function tempVis(data) {
     d3.select('#chart').selectAll('*').remove(); //////////////////
- 
-    //let XMAX = data[0+data.length-1].Time
-    //let XMIN = parseInt(valmin.value)
-    
-    //XMIN = parseInt(valmin.value)
-    //XMAX = parseInt(valmax.value)
+    let XMIN = 0
+    let XMAX = data.length-1
+    console.log('max ' + XMAX)
     let MAXTEMP = 0
     let MINTEMP = 0
     getMaxTemp(data, (maxValue) => {
@@ -87,25 +63,25 @@ function tempVis(data,valmin,valmax) {
         .curve(d3.curveMonotoneX) // apply smoothing to the line
     //add line to chart
     svg.append("path")
-        .datum(parsedData) // 10. Binds data to the line 
+        .datum(data) // 10. Binds data to the line 
         .attr("class", "line") // Assign a class for styling 
         .attr("d", line); // 11. Calls the line generator 
     //create area
     const area = d3
         .area()
-        .x(parsedData => xScale(parsedData.Time))
+        .x(data => xScale(data.Time))
         .y0(height)
-        .y1(parsedData => yScale(parsedData.temp));
+        .y1(data => yScale(data.temp));
     //append area to chart
     svg
         .append("path")
         .attr("transform", `translate(0,0)`)
-        .datum(parsedData)
+        .datum(data)
         .style("fill", "lightblue")
         .attr("stroke", "steelblue")
         .attr("stroke-linejoin", "round")
         .attr("stroke-linecap", "round")
-        .attr("stroke-width", 1)
+        .attr("stroke-width", 0.8)
         .attr("d", area);
     //append y label
     svg.append("text")
@@ -154,13 +130,13 @@ function tempVis(data,valmin,valmax) {
     function mousemove() {
         // recover coordinate we need
         var x0 = xScale.invert(d3.mouse(this)[0]);
-        var i = bisect(parsedData, x0, 1);
-        selectedData = parsedData[i]
+        var i = bisect(data, x0, 1);
+        selectedData = data[i]
         focus
             .attr("cx", xScale(selectedData.Time))
             .attr("cy", yScale(selectedData.temp))
         focusText
-            .html(selectedData.temp + ' : ' + selectedData.Time)
+            .html(selectedData.temp)
             .attr("x", xScale(selectedData.Time) + 15)
             .attr("y", yScale(selectedData.temp))
             .style("font-size", "8px")
