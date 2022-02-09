@@ -1,0 +1,63 @@
+.axis line {
+    stroke: #706f6f;
+    stroke-width: 0.5;
+    shape-rendering: crispEdges;
+  }
+  .axis path {
+    stroke: #706f6f;
+    stroke-width: 0.7;
+    shape-rendering: crispEdges;
+  }
+  .axis text {
+    fill: #2b2929;
+    font-family: 'Trebuchet MS';
+    font-size: 80%;
+  }
+  .line {
+    fill: none;
+    stroke: #ffab00;
+    stroke-width: 1;
+  }
+  .overlay {
+    fill: none;
+    pointer-events: all;
+  }
+
+  body {
+      background-color: #2a3630 !important;
+  }
+
+  .clr {
+      color: white;
+  }
+
+  .fade-efect {
+    -webkit-animation: fadein 4s; /* Safari, Chrome and Opera > 12.1 */
+       -moz-animation: fadein 4s; /* Firefox < 16 */
+        -ms-animation: fadein 4s; /* Internet Explorer */
+         -o-animation: fadein 4s; /* Opera < 12.1 */
+            animation: fadein 4s;
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Firefox < 16 */
+@-moz-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Safari, Chrome and Opera > 12.1 */
+@-webkit-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Internet Explorer */
+@-ms-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
