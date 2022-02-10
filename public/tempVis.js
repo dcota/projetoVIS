@@ -33,6 +33,8 @@ function tempVis(data) {
     })
 
     const svg = d3.select('#chart')
+        .append('div')
+        .attr('class','fade-efect')
         .append('svg')
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
@@ -50,14 +52,14 @@ function tempVis(data) {
     const xaxis = d3.axisBottom().scale(xScale);
 
     //append xaxis to chart
-    svg.append("g")
-        .attr("class", "axis")
-        .attr("transform", "translate(0," + height + ")")
+    svg.append('g')
+        .attr('class', 'axis')
+        .attr('transform', 'translate(0,' + height + ')')
         .call(xaxis);
 
     //append yaxis to chart
-    svg.append("g")
-        .attr("class", "axis")
+    svg.append('g')
+        .attr('class', 'axis')
         .call(yaxis);
 
     //create line
@@ -67,10 +69,10 @@ function tempVis(data) {
         .curve(d3.curveMonotoneX) 
 
     //add line to chart
-    svg.append("path")
+    svg.append('path')
         .datum(data) 
-        .attr("class", "line") 
-        .attr("d", line);  
+        .attr('class', 'line') 
+        .attr('d', line);  
 
     //create area
     const area = d3
@@ -81,40 +83,40 @@ function tempVis(data) {
 
     //append area to chart
     svg
-        .append("path")
-        .attr("transform", `translate(0,0)`)
+        .append('path')
+        .attr('transform', `translate(0,0)`)
         .datum(data)
-        .style("fill", "lightblue")
-        .attr("stroke", "steelblue")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-linecap", "round")
-        .attr("stroke-width", 0.8)
-        .attr("d", area);
+        .style('fill', 'lightblue')
+        .attr('stroke', 'steelblue')
+        .attr('stroke-linejoin', 'round')
+        .attr('stroke-linecap', 'round')
+        .attr('stroke-width', 0.8)
+        .attr('d', area);
 
     //append y label
-    svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 0 - margin.left)
-        .attr("x", 0 - (height / 2))
-        .attr("dy", "2em")
-        .style("text-anchor", "middle")
-        .style("font-size", "10px")
-        .text("Temperatura (C)");
+    svg.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', 0 - margin.left)
+        .attr('x', 0 - (height / 2))
+        .attr('dy', '2em')
+        .style('text-anchor', 'middle')
+        .style('font-size', '10px')
+        .text('Temperatura (C)');
 
     //append x label
-    svg.append("text")
-        .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.top + 20) + ")")
-        .style("text-anchor", "middle")
-        .style("font-size", "10px")
-        .text("Tempo (s)");
+    svg.append('text')
+        .attr('transform', 'translate(' + (width / 2) + ' ,' + (height + margin.top + 20) + ')')
+        .style('text-anchor', 'middle')
+        .style('font-size', '10px')
+        .text('Tempo (s)');
 
     //append title
-    svg.append("text")
-        .attr("x", 220)             
-        .attr("y", -6)
-        .attr("text-anchor", "middle")  
-        .style("font-size", "15px")
-        .text("Temperatura do ar (t)");
+    svg.append('text')
+        .attr('x', 220)             
+        .attr('y', -6)
+        .attr('text-anchor', 'middle')  
+        .style('font-size', '15px')
+        .text('Temperatura do ar (t)');
 
     //tooltip
     var bisect = d3.bisector(d => d.Time).left;
@@ -122,22 +124,22 @@ function tempVis(data) {
     var focus = svg
         .append('g')
         .append('circle')
-        .style("fill", "red")
-        .attr("stroke", "black")
+        .style('fill', 'red')
+        .attr('stroke', 'black')
         .attr('r', 3)
-        .style("opacity", 0)
+        .style('opacity', 0)
 
     var focusText = svg
         .append('g')
         .append('text')
-        .style("opacity", 0)
-        .attr("text-anchor", "left")
-        .attr("alignment-baseline", "middle")
+        .style('opacity', 0)
+        .attr('text-anchor', 'left')
+        .attr('alignment-baseline', 'middle')
 
     svg
         .append('rect')
-        .style("fill", "none")
-        .style("pointer-events", "all")
+        .style('fill', 'none')
+        .style('pointer-events', 'all')
         .attr('width', width)
         .attr('height', height)
         .on('mouseover', mouseover)
@@ -145,8 +147,8 @@ function tempVis(data) {
         .on('mouseout', mouseout);
 
     function mouseover() {
-        focus.style("opacity", 1)
-        focusText.style("opacity", 1)
+        focus.style('opacity', 1)
+        focusText.style('opacity', 1)
     }
 
     function mousemove() {
@@ -155,18 +157,18 @@ function tempVis(data) {
         var i = bisect(data, x0, 1);
         selectedData = data[i]
         focus
-            .attr("cx", xScale(selectedData.Time))
-            .attr("cy", yScale(selectedData.temp))
+            .attr('cx', xScale(selectedData.Time))
+            .attr('cy', yScale(selectedData.temp))
         focusText
             .html(selectedData.temp)
-            .attr("x", xScale(selectedData.Time) + 15)
-            .attr("y", yScale(selectedData.temp))
-            .style("font-size", "8px")
+            .attr('x', xScale(selectedData.Time) + 15)
+            .attr('y', yScale(selectedData.temp))
+            .style('font-size', '8px')
     }
 
     function mouseout() {
-        focus.style("opacity", 0)
-        focusText.style("opacity", 0)
+        focus.style('opacity', 0)
+        focusText.style('opacity', 0)
     }
 
     //method to controll responsitivy

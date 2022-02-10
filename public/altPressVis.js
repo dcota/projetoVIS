@@ -58,6 +58,8 @@ function altPressVis(data) {
         MINPRESS = minValue - 50
     })
     const svg = d3.select('#chart')
+        .append('div')
+        .attr('class','fade-efect')
         .append('svg')
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
@@ -78,20 +80,20 @@ function altPressVis(data) {
     const xaxis = d3.axisBottom().scale(xScale);
 
     //append xaxis to chart
-    svg.append("g")
-        .attr("class", "axis")
-        .attr("transform", "translate(0," + height + ")")
+    svg.append('g')
+        .attr('class', 'axis')
+        .attr('transform', 'translate(0,' + height + ')')
         .call(xaxis);
 
     //append yaxis to chart
-    svg.append("g")
-        .attr("class", "axis")
+    svg.append('g')
+        .attr('class', 'axis')
         .call(yaxis);
 
     //append y1axis to chart
-    svg.append("g")
-        .attr("class", "axis")
-        .attr("transform", "translate(" + width + " ,0)")
+    svg.append('g')
+        .attr('class', 'axis')
+        .attr('transform', 'translate(' + width + ' ,0)')
         .call(y1axis);
 
     //create line for altitude
@@ -101,10 +103,10 @@ function altPressVis(data) {
         .curve(d3.curveMonotoneX)
 
     //add line to chart
-    svg.append("path")
+    svg.append('path')
         .datum(data) 
-        .attr("class", "line") 
-        .attr("d", line); 
+        .attr('class', 'line') 
+        .attr('d', line); 
 
     //create line for Pressure
     var line = d3.line()
@@ -113,10 +115,10 @@ function altPressVis(data) {
         .curve(d3.curveMonotoneX) 
 
     //add line to chart
-    svg.append("path")
+    svg.append('path')
         .datum(data) 
-        .attr("class", "line")  
-        .attr("d", line); 
+        .attr('class', 'line')  
+        .attr('d', line); 
 
     //create area - altitude
     const area = d3
@@ -127,16 +129,16 @@ function altPressVis(data) {
 
     //append area to chart - altitude
     svg
-        .append("path")
-        .attr("transform", `translate(0,0)`)
+        .append('path')
+        .attr('transform', `translate(0,0)`)
         .datum(data)
-        .style("fill", "#EFEE69")
-        .style("opacity", 0.4)
-        .attr("stroke", "#715F25")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-linecap", "round")
-        .attr("stroke-width", 0.6)
-        .attr("d", area);
+        .style('fill', '#EFEE69')
+        .style('opacity', 0.4)
+        .attr('stroke', '#715F25')
+        .attr('stroke-linejoin', 'round')
+        .attr('stroke-linecap', 'round')
+        .attr('stroke-width', 0.6)
+        .attr('d', area);
 
     //create area - pressure
     const area2 = d3
@@ -147,51 +149,51 @@ function altPressVis(data) {
 
     //append area to chart - altitude
     svg
-        .append("path")
-        .attr("transform", `translate(0,0)`)
+        .append('path')
+        .attr('transform', `translate(0,0)`)
         .datum(data)
-        .style("fill", "#709249")
-        .style("opacity", 0.4)
-        .attr("stroke", "##1D3922")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-linecap", "round")
-        .attr("stroke-width", 0.6)
-        .attr("d", area2);
+        .style('fill', '#709249')
+        .style('opacity', 0.4)
+        .attr('stroke', '##1D3922')
+        .attr('stroke-linejoin', 'round')
+        .attr('stroke-linecap', 'round')
+        .attr('stroke-width', 0.6)
+        .attr('d', area2);
 
     //append y label
-    svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 0 - margin.left)
-        .attr("x", 0 - (height / 2))
-        .attr("dy", "2em")
-        .style("text-anchor", "middle")
-        .style("font-size", "10px")
-        .text("Altitude (m)");
+    svg.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', 0 - margin.left)
+        .attr('x', 0 - (height / 2))
+        .attr('dy', '2em')
+        .style('text-anchor', 'middle')
+        .style('font-size', '10px')
+        .text('Altitude (m)');
 
     //append y1 label
-    svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 0 - margin.right)
-        .attr("x", 0 - (height / 2))
-        .attr("dy", "59em")
-        .style("text-anchor", "middle")
-        .style("font-size", "10px")
-        .text("Pressure (hPa)");
+    svg.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', 0 - margin.right)
+        .attr('x', 0 - (height / 2))
+        .attr('dy', '59em')
+        .style('text-anchor', 'middle')
+        .style('font-size', '10px')
+        .text('Pressure (hPa)');
 
     //append x label
-    svg.append("text")
-        .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.top + 20) + ")")
-        .style("text-anchor", "middle")
-        .style("font-size", "10px")
-        .text("Tempo (s)");
+    svg.append('text')
+        .attr('transform', 'translate(' + (width / 2) + ' ,' + (height + margin.top + 20) + ')')
+        .style('text-anchor', 'middle')
+        .style('font-size', '10px')
+        .text('Tempo (s)');
 
     //append title
-    svg.append("text")
-        .attr("x", 220)             
-        .attr("y", -6)
-        .attr("text-anchor", "middle")  
-        .style("font-size", "15px")
-        .text("Altitude e Pressão atmosférica (t)");
+    svg.append('text')
+        .attr('x', 220)             
+        .attr('y', -6)
+        .attr('text-anchor', 'middle')  
+        .style('font-size', '15px')
+        .text('Altitude e Pressão atmosférica (t)');
 
     //method to controll responsitivy
     function responsivefy(svg) {
