@@ -17,7 +17,7 @@ function getMaxPress(data, callback) {
     callback(maxValue)
 }
 
-//method to get the minimum value of pressure
+//method to get the minimum value of pressure 
 function getMinPress(data, callback) {
     let minValue = Infinity
     for (i in data) {
