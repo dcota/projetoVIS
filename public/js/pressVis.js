@@ -1,35 +1,37 @@
-function getMaxTemp(data, callback) {
+function getMaxPress(data, callback) {
     let maxValue = 0
-    for (i in data) {
-        if (data[i].temp > maxValue)
-            maxValue = data[i].temp
+    for (let i = 0; i < data.length; i++) {
+        if (parseInt(data[i].press) > maxValue) {
+            maxValue = parseInt(data[i].press)
+        }
     }
     callback(maxValue)
 }
 
-function getMinTemp(data, callback) {
+
+function getMinPress(data, callback) {
     let minValue = Infinity
     for (i in data) {
-        if (data[i].temp < minValue)
-            minValue = data[i].temp
+        if (parseInt(data[i].press) < minValue)
+            minValue = parseInt(data[i].press)
     }
     callback(minValue)
 }
 
-function tempVis(data) {
+function pressVis(data) {
     d3.select('#chart').selectAll('*').remove();
     let XMIN = data[0].Time
-    let XMAX = data.length-1
+    let XMAX = data.length - 1
     console.log('max ' + XMAX)
-    let MAXTEMP = 0
-    let MINTEMP = 0
+    let MAXPRESS = 0
+    let MINPRESS = 0
 
-    getMaxTemp(data, (maxValue) => {
-        MAXTEMP = maxValue + 1
+    getMaxPress(data, (maxValue) => {
+        MAXPRESS = maxValue + 10
     })
 
-    getMinTemp(data, (minValue) => {
-        MINTEMP = minValue - 1
+    getMinPress(data, (minValue) => {
+        MINPRESS = minValue - 10
     })
 
     const svg = d3.select('#chart')
@@ -46,7 +48,7 @@ function tempVis(data) {
     const yScale = d3.scaleLinear().range([height, 0]);
 
     xScale.domain([XMIN, XMAX]);
-    yScale.domain([MINTEMP, MAXTEMP]);
+    yScale.domain([MINPRESS, MAXPRESS]);
 
     const yaxis = d3.axisLeft().scale(yScale);
     const xaxis = d3.axisBottom().scale(xScale);
@@ -61,33 +63,34 @@ function tempVis(data) {
     svg.append('g')
         .attr('class', 'axis')
         .call(yaxis);
-
+        
     //create line
     var line = d3.line()
-        .x(function (d, i) { return xScale(d.Time); }) 
-        .y(function (d) { return yScale(d.temp); })  
-        .curve(d3.curveMonotoneX) 
+        .x(function (d, i) { return xScale(d.Time); })
+        .y(function (d) { return yScale(d.press); })
+        .curve(d3.curveMonotoneX)
 
     //add line to chart
     svg.append('path')
         .datum(data) 
         .attr('class', 'line') 
-        .attr('d', line);  
+        .attr('d', line); 
 
     //create area
     const area = d3
         .area()
         .x(data => xScale(data.Time))
         .y0(height)
-        .y1(data => yScale(data.temp));
+        .y1(data => yScale(data.press));
 
     //append area to chart
     svg
         .append('path')
         .attr('transform', `translate(0,0)`)
         .datum(data)
-        .style('fill', 'lightblue')
-        .attr('stroke', 'steelblue')
+        .style('fill', '#A3CCE9')
+        .style('opacity', 1)
+        .attr('stroke', '#1170AA')
         .attr('stroke-linejoin', 'round')
         .attr('stroke-linecap', 'round')
         .attr('stroke-width', 0.8)
@@ -98,10 +101,10 @@ function tempVis(data) {
         .attr('transform', 'rotate(-90)')
         .attr('y', 0 - margin.left)
         .attr('x', 0 - (height / 2))
-        .attr('dy', '2em')
+        .attr('dy', '1.5em')
         .style('text-anchor', 'middle')
         .style('font-size', '10px')
-        .text('Temperatura (C)');
+        .text('Pressão atmosférica (hPa)');
 
     //append x label
     svg.append('text')
@@ -116,26 +119,23 @@ function tempVis(data) {
         .attr('y', -6)
         .attr('text-anchor', 'middle')  
         .style('font-size', '15px')
-        .text('Temperatura do ar (t)');
+        .text('Pressão atmosférica (t)');
 
     //tooltip
     var bisect = d3.bisector(d => d.Time).left;
-
     var focus = svg
         .append('g')
         .append('circle')
-        .style('fill', 'red')
-        .attr('stroke', 'black')
+        .style('fill', '#1170AA')
+        .attr('stroke', '#1170AA')
         .attr('r', 3)
         .style('opacity', 0)
-
     var focusText = svg
         .append('g')
         .append('text')
         .style('opacity', 0)
         .attr('text-anchor', 'left')
         .attr('alignment-baseline', 'middle')
-
     svg
         .append('rect')
         .style('fill', 'none')
@@ -158,11 +158,11 @@ function tempVis(data) {
         selectedData = data[i]
         focus
             .attr('cx', xScale(selectedData.Time))
-            .attr('cy', yScale(selectedData.temp))
+            .attr('cy', yScale(selectedData.press))
         focusText
-            .html(selectedData.temp)
+            .html(selectedData.press)
             .attr('x', xScale(selectedData.Time) + 15)
-            .attr('y', yScale(selectedData.temp))
+            .attr('y', yScale(selectedData.press))
             .style('font-size', '8px')
     }
 

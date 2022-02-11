@@ -9,11 +9,11 @@
     integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
     crossorigin="anonymous"></script>
   <script src='https://d3js.org/d3.v5.min.js'></script>
-  <link href="styles.css" type="text/css" rel="stylesheet" />
-  <script src="tempVis.js"></script>
-  <script src="pressVis.js"></script>
-  <script src="altVis.js"></script>
-  <script src="altPressVis.js"></script>
+  <link href="./css/styles.css" type="text/css" rel="stylesheet" />
+  <script src="./js/tempVis.js"></script>
+  <script src="./js/pressVis.js"></script>
+  <script src="./js/altVis.js"></script>
+  <script src="./js/altPressVis.js"></script>
 </head>
 
 <body>
@@ -102,7 +102,7 @@
       })
   }
 
-  convertJson('data.json', (data) => {
+  convertJson('./data/data.json', (data) => {
     t.addEventListener('change', () => {
       if (t.checked) {
         document.getElementById('chart').style.display = 'block'

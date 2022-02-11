@@ -1,3 +1,22 @@
+function getMaxAlt(data, callback) {
+    let maxValue = 0
+    for (let i = 0; i < data.length; i++) {
+        if (parseInt(data[i].h) > maxValue) {
+            maxValue = parseInt(data[i].h)
+        }
+    }
+    callback(maxValue)
+}
+
+function getMinAlt(data, callback) {
+    let minValue = Infinity
+    for (i in data) {
+        if (parseInt(data[i].h) < minValue)
+            minValue = parseInt(data[i].h)
+    }
+    callback(minValue)
+}
+
 function getMaxPress(data, callback) {
     let maxValue = 0
     for (let i = 0; i < data.length; i++) {
@@ -18,22 +37,26 @@ function getMinPress(data, callback) {
     callback(minValue)
 }
 
-function pressVis(data) {
+function altPressVis(data) {
     d3.select('#chart').selectAll('*').remove();
     let XMIN = data[0].Time
     let XMAX = data.length - 1
-    console.log('max ' + XMAX)
+    let MAXALT = 0
+    let MINALT = 0
     let MAXPRESS = 0
     let MINPRESS = 0
-
+    getMaxAlt(data, (maxValue) => {
+        MAXALT = maxValue + 50
+    })
+    getMinAlt(data, (minValue) => {
+        MINALT = minValue
+    })
     getMaxPress(data, (maxValue) => {
-        MAXPRESS = maxValue + 10
+        MAXPRESS = maxValue + 50
     })
-
     getMinPress(data, (minValue) => {
-        MINPRESS = minValue - 10
+        MINPRESS = minValue - 50
     })
-
     const svg = d3.select('#chart')
         .append('div')
         .attr('class','fade-efect')
@@ -46,11 +69,14 @@ function pressVis(data) {
 
     const xScale = d3.scaleLinear().range([0, width]);
     const yScale = d3.scaleLinear().range([height, 0]);
+    const y1Scale = d3.scaleLinear().range([height, 0]);
 
     xScale.domain([XMIN, XMAX]);
-    yScale.domain([MINPRESS, MAXPRESS]);
+    yScale.domain([MINALT, MAXALT]);
+    y1Scale.domain([MINPRESS, MAXPRESS]);
 
     const yaxis = d3.axisLeft().scale(yScale);
+    const y1axis = d3.axisRight().scale(y1Scale);
     const xaxis = d3.axisBottom().scale(xScale);
 
     //append xaxis to chart
@@ -63,11 +89,17 @@ function pressVis(data) {
     svg.append('g')
         .attr('class', 'axis')
         .call(yaxis);
-        
-    //create line
+
+    //append y1axis to chart
+    svg.append('g')
+        .attr('class', 'axis')
+        .attr('transform', 'translate(' + width + ' ,0)')
+        .call(y1axis);
+
+    //create line for altitude
     var line = d3.line()
-        .x(function (d, i) { return xScale(d.Time); })
-        .y(function (d) { return yScale(d.press); })
+        .x(function (d, i) { return xScale(d.Time); }) 
+        .y(function (d) { return yScale(d.h); }) 
         .curve(d3.curveMonotoneX)
 
     //add line to chart
@@ -76,32 +108,74 @@ function pressVis(data) {
         .attr('class', 'line') 
         .attr('d', line); 
 
-    //create area
+    //create line for Pressure
+    var line = d3.line()
+        .x(function (d, i) { return xScale(d.Time); }) 
+        .y(function (d) { return y1Scale(d.press); })
+        .curve(d3.curveMonotoneX) 
+
+    //add line to chart
+    svg.append('path')
+        .datum(data) 
+        .attr('class', 'line')  
+        .attr('d', line); 
+
+    //create area - altitude
     const area = d3
         .area()
         .x(data => xScale(data.Time))
         .y0(height)
-        .y1(data => yScale(data.press));
+        .y1(data => yScale(data.h));
 
-    //append area to chart
+    //append area to chart - altitude
     svg
         .append('path')
         .attr('transform', `translate(0,0)`)
         .datum(data)
-        .style('fill', '#709249')
+        .style('fill', '#FFBC79')
         .style('opacity', 0.4)
-        .attr('stroke', '#21472E')
+        .attr('stroke', '#715F25')
         .attr('stroke-linejoin', 'round')
         .attr('stroke-linecap', 'round')
-        .attr('stroke-width', 0.8)
+        .attr('stroke-width', 0.6)
         .attr('d', area);
+
+    //create area - pressure
+    const area2 = d3
+        .area()
+        .x(data => xScale(data.Time))
+        .y0(0)
+        .y1(data => y1Scale(data.press));
+
+    //append area to chart - altitude
+    svg
+        .append('path')
+        .attr('transform', `translate(0,0)`)
+        .datum(data)
+        .style('fill', '#5FA2CE')
+        .style('opacity', 0.4)
+        .attr('stroke', '##1D3922')
+        .attr('stroke-linejoin', 'round')
+        .attr('stroke-linecap', 'round')
+        .attr('stroke-width', 0.6)
+        .attr('d', area2);
 
     //append y label
     svg.append('text')
         .attr('transform', 'rotate(-90)')
         .attr('y', 0 - margin.left)
         .attr('x', 0 - (height / 2))
-        .attr('dy', '1.5em')
+        .attr('dy', '2em')
+        .style('text-anchor', 'middle')
+        .style('font-size', '10px')
+        .text('Altitude (m)');
+
+    //append y1 label
+    svg.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', 0 - margin.right)
+        .attr('x', 0 - (height / 2))
+        .attr('dy', '59em')
         .style('text-anchor', 'middle')
         .style('font-size', '10px')
         .text('Pressão atmosférica (hPa)');
@@ -119,57 +193,7 @@ function pressVis(data) {
         .attr('y', -6)
         .attr('text-anchor', 'middle')  
         .style('font-size', '15px')
-        .text('Pressão atmosférica (t)');
-
-    //tooltip
-    var bisect = d3.bisector(d => d.Time).left;
-    var focus = svg
-        .append('g')
-        .append('circle')
-        .style('fill', 'red')
-        .attr('stroke', 'black')
-        .attr('r', 3)
-        .style('opacity', 0)
-    var focusText = svg
-        .append('g')
-        .append('text')
-        .style('opacity', 0)
-        .attr('text-anchor', 'left')
-        .attr('alignment-baseline', 'middle')
-    svg
-        .append('rect')
-        .style('fill', 'none')
-        .style('pointer-events', 'all')
-        .attr('width', width)
-        .attr('height', height)
-        .on('mouseover', mouseover)
-        .on('mousemove', mousemove)
-        .on('mouseout', mouseout);
-
-    function mouseover() {
-        focus.style('opacity', 1)
-        focusText.style('opacity', 1)
-    }
-
-    function mousemove() {
-        // recover coordinate we need
-        var x0 = xScale.invert(d3.mouse(this)[0]);
-        var i = bisect(data, x0, 1);
-        selectedData = data[i]
-        focus
-            .attr('cx', xScale(selectedData.Time))
-            .attr('cy', yScale(selectedData.press))
-        focusText
-            .html(selectedData.press)
-            .attr('x', xScale(selectedData.Time) + 15)
-            .attr('y', yScale(selectedData.press))
-            .style('font-size', '8px')
-    }
-
-    function mouseout() {
-        focus.style('opacity', 0)
-        focusText.style('opacity', 0)
-    }
+        .text('Altitude e Pressão atmosférica (t)');
 
     //method to controll responsitivy
     function responsivefy(svg) {
