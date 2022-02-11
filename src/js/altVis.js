@@ -1,35 +1,65 @@
-function getMaxTemp(data, callback) {
+/*
+Mestrado em Engenharia Informática e Tecnologia Web
+Visualização de Informação
+Projeto Final
+Autor: Duarte Cota - 2022
+Ficheiro da vis - altitude (t)
+*/
+
+//method to get maximum value of altitude
+function getMaxAlt(data, callback) {
     let maxValue = 0
-    for (i in data) {
-        if (data[i].temp > maxValue)
-            maxValue = data[i].temp
+    for (let i = 0; i < data.length; i++) {
+        if (parseInt(data[i].h) > maxValue) {
+            maxValue = parseInt(data[i].h)
+        }
     }
     callback(maxValue)
 }
 
-function getMinTemp(data, callback) {
+//method to get the minimum value of altitude
+function getMinAlt(data, callback) {
     let minValue = Infinity
     for (i in data) {
-        if (data[i].temp < minValue)
-            minValue = data[i].temp
+        if (parseInt(data[i].h) < minValue)
+            minValue = parseInt(data[i].h)
     }
     callback(minValue)
 }
 
-function tempVis(data) {
+//method to keep the vis responsive
+function responsify(svg) {
+    const container = d3.select(svg.node().parentNode),
+        width = parseInt(svg.style('width'), 10),
+        height = parseInt(svg.style('height'), 10),
+        aspect = width / height;
+    svg.attr('viewBox', `0 0 ${width} ${height}`).
+    attr('preserveAspectRatio', 'xMinYMid').
+    call(resize);
+    //detect resize event, call resize to set new atributes
+    d3.select(window).on('resize.' + container.attr('id'), resize);
+
+    function resize() {
+        const targetWidth = parseInt(container.style('width'));
+        svg.attr('width', targetWidth);
+        svg.attr('height', Math.round(targetWidth / aspect));
+    }
+}
+
+//mehtod to render vis
+function altVis(data) {
     d3.select('#chart').selectAll('*').remove();
     let XMIN = data[0].Time
     let XMAX = data.length - 1
-    console.log('max ' + XMAX)
-    let MAXTEMP = 0
-    let MINTEMP = 0
+    let MAXALT = 0
+    let MINALT = 0
 
-    getMaxTemp(data, (maxValue) => {
-        MAXTEMP = maxValue + 1
+    getMaxAlt(data, (maxValue) => {
+        MAXALT = maxValue + 1
     })
 
-    getMinTemp(data, (minValue) => {
-        MINTEMP = minValue - 1
+    getMinAlt(data, (minValue) => {
+        MINALT = minValue - 1
     })
 
     const svg = d3.select('#chart')
@@ -38,7 +68,7 @@ function tempVis(data) {
         .append('svg')
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
-        .call(responsivefy) // call method to keep the chart responsive
+        .call(responsify) // call method to keep the chart responsive
         .append('g')
         .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
@@ -46,7 +76,7 @@ function tempVis(data) {
     const yScale = d3.scaleLinear().range([height, 0]);
 
     xScale.domain([XMIN, XMAX]);
-    yScale.domain([MINTEMP, MAXTEMP]);
+    yScale.domain([MINALT, MAXALT]);
 
     const yaxis = d3.axisLeft().scale(yScale);
     const xaxis = d3.axisBottom().scale(xScale);
@@ -65,7 +95,7 @@ function tempVis(data) {
     //create line
     var line = d3.line()
         .x(function(d, i) { return xScale(d.Time); })
-        .y(function(d) { return yScale(d.temp); })
+        .y(function(d) { return yScale(d.h); })
         .curve(d3.curveMonotoneX)
 
     //add line to chart
@@ -79,15 +109,15 @@ function tempVis(data) {
         .area()
         .x(data => xScale(data.Time))
         .y0(height)
-        .y1(data => yScale(data.temp));
+        .y1(data => yScale(data.h));
 
     //append area to chart
     svg
         .append('path')
         .attr('transform', `translate(0,0)`)
         .datum(data)
-        .style('fill', '#FFBC79')
-        .attr('stroke', '#C85200')
+        .style('fill', '#C85200')
+        .attr('stroke', '#FC7D0B')
         .attr('stroke-linejoin', 'round')
         .attr('stroke-linecap', 'round')
         .attr('stroke-width', 0.8)
@@ -101,7 +131,7 @@ function tempVis(data) {
         .attr('dy', '2em')
         .style('text-anchor', 'middle')
         .style('font-size', '10px')
-        .text('Temperatura (C)');
+        .text('Altitude (m)');
 
     //append x label
     svg.append('text')
@@ -116,26 +146,23 @@ function tempVis(data) {
         .attr('y', -6)
         .attr('text-anchor', 'middle')
         .style('font-size', '15px')
-        .text('Temperatura do ar (t)');
+        .text('Altitude (t)');
 
     //tooltip
     var bisect = d3.bisector(d => d.Time).left;
-
     var focus = svg
         .append('g')
         .append('circle')
-        .style('fill', '#C85200')
-        .attr('stroke', '#C85200')
+        .style('fill', '#FC7D0B')
+        .attr('stroke', '#FC7D0B')
         .attr('r', 3)
         .style('opacity', 0)
-
     var focusText = svg
         .append('g')
         .append('text')
         .style('opacity', 0)
         .attr('text-anchor', 'left')
         .attr('alignment-baseline', 'middle')
-
     svg
         .append('rect')
         .style('fill', 'none')
@@ -158,34 +185,16 @@ function tempVis(data) {
         selectedData = data[i]
         focus
             .attr('cx', xScale(selectedData.Time))
-            .attr('cy', yScale(selectedData.temp))
+            .attr('cy', yScale(selectedData.h))
         focusText
-            .html(selectedData.temp)
+            .html(selectedData.h)
             .attr('x', xScale(selectedData.Time) + 15)
-            .attr('y', yScale(selectedData.temp))
+            .attr('y', yScale(selectedData.h))
             .style('font-size', '8px')
     }
 
     function mouseout() {
         focus.style('opacity', 0)
         focusText.style('opacity', 0)
-    }
-
-    //method to controll responsitivy
-    function responsivefy(svg) {
-        const container = d3.select(svg.node().parentNode),
-            width = parseInt(svg.style('width'), 10),
-            height = parseInt(svg.style('height'), 10),
-            aspect = width / height;
-        svg.attr('viewBox', `0 0 ${width} ${height}`).
-        attr('preserveAspectRatio', 'xMinYMid').
-        call(resize);
-        d3.select(window).on('resize.' + container.attr('id'), resize);
-
-        function resize() {
-            const targetWidth = parseInt(container.style('width'));
-            svg.attr('width', targetWidth);
-            svg.attr('height', Math.round(targetWidth / aspect));
-        }
     }
 }

@@ -1,3 +1,12 @@
+/*
+Mestrado em Engenharia Informática e Tecnologia Web
+Visualização de Informação
+Projeto Final
+Autor: Duarte Cota - 2022
+Ficheiro da vis - pressão (t)
+*/
+
+//method to get maximum value of pressure
 function getMaxPress(data, callback) {
     let maxValue = 0
     for (let i = 0; i < data.length; i++) {
@@ -8,6 +17,7 @@ function getMaxPress(data, callback) {
     callback(maxValue)
 }
 
+//method to get the minimum value of pressure
 function getMinPress(data, callback) {
     let minValue = Infinity
     for (i in data) {
@@ -17,6 +27,26 @@ function getMinPress(data, callback) {
     callback(minValue)
 }
 
+//method to keep the vis responsive
+function responsify(svg) {
+    const container = d3.select(svg.node().parentNode),
+        width = parseInt(svg.style('width'), 10),
+        height = parseInt(svg.style('height'), 10),
+        aspect = width / height;
+    svg.attr('viewBox', `0 0 ${width} ${height}`).
+    attr('preserveAspectRatio', 'xMinYMid').
+    call(resize);
+    //detect resize event, call resize to set new atributes
+    d3.select(window).on('resize.' + container.attr('id'), resize);
+
+    function resize() {
+        const targetWidth = parseInt(container.style('width'));
+        svg.attr('width', targetWidth);
+        svg.attr('height', Math.round(targetWidth / aspect));
+    }
+}
+
+//mehtod to render vis
 function pressVis(data) {
     d3.select('#chart').selectAll('*').remove();
     let XMIN = data[0].Time
@@ -39,7 +69,7 @@ function pressVis(data) {
         .append('svg')
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
-        .call(responsivefy) // call method to keep the chart responsive
+        .call(responsify) // call method to keep the chart responsive
         .append('g')
         .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
@@ -168,23 +198,5 @@ function pressVis(data) {
     function mouseout() {
         focus.style('opacity', 0)
         focusText.style('opacity', 0)
-    }
-
-    //method to controll responsitivy
-    function responsivefy(svg) {
-        const container = d3.select(svg.node().parentNode),
-            width = parseInt(svg.style('width'), 10),
-            height = parseInt(svg.style('height'), 10),
-            aspect = width / height;
-        svg.attr('viewBox', `0 0 ${width} ${height}`).
-        attr('preserveAspectRatio', 'xMinYMid').
-        call(resize);
-        d3.select(window).on('resize.' + container.attr('id'), resize);
-
-        function resize() {
-            const targetWidth = parseInt(container.style('width'));
-            svg.attr('width', targetWidth);
-            svg.attr('height', Math.round(targetWidth / aspect));
-        }
     }
 }
