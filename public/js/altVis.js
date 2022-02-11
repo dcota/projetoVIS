@@ -8,7 +8,6 @@ function getMaxAlt(data, callback) {
     callback(maxValue)
 }
 
-
 function getMinAlt(data, callback) {
     let minValue = Infinity
     for (i in data) {
@@ -21,7 +20,7 @@ function getMinAlt(data, callback) {
 function altVis(data) {
     d3.select('#chart').selectAll('*').remove();
     let XMIN = data[0].Time
-    let XMAX = data.length-1
+    let XMAX = data.length - 1
     let MAXALT = 0
     let MINALT = 0
 
@@ -34,8 +33,8 @@ function altVis(data) {
     })
 
     const svg = d3.select('#chart')
-        .append('div')
-        .attr('class','fade-efect')
+        .append('section')
+        .attr('class', 'fade-efect')
         .append('svg')
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
@@ -65,15 +64,15 @@ function altVis(data) {
 
     //create line
     var line = d3.line()
-        .x(function (d, i) { return xScale(d.Time); })
-        .y(function (d) { return yScale(d.h); })
+        .x(function(d, i) { return xScale(d.Time); })
+        .y(function(d) { return yScale(d.h); })
         .curve(d3.curveMonotoneX)
 
     //add line to chart
     svg.append('path')
-        .datum(data) 
-        .attr('class', 'line') 
-        .attr('d', line); 
+        .datum(data)
+        .attr('class', 'line')
+        .attr('d', line);
 
     //create area
     const area = d3
@@ -113,9 +112,9 @@ function altVis(data) {
 
     //append title
     svg.append('text')
-        .attr('x', 220)             
+        .attr('x', 220)
         .attr('y', -6)
-        .attr('text-anchor', 'middle')  
+        .attr('text-anchor', 'middle')
         .style('font-size', '15px')
         .text('Altitude (t)');
 
@@ -176,9 +175,10 @@ function altVis(data) {
             height = parseInt(svg.style('height'), 10),
             aspect = width / height;
         svg.attr('viewBox', `0 0 ${width} ${height}`).
-            attr('preserveAspectRatio', 'xMinYMid').
-            call(resize);
+        attr('preserveAspectRatio', 'xMinYMid').
+        call(resize);
         d3.select(window).on('resize.' + container.attr('id'), resize);
+
         function resize() {
             const targetWidth = parseInt(container.style('width'));
             svg.attr('width', targetWidth);

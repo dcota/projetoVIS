@@ -19,7 +19,7 @@ function getMinTemp(data, callback) {
 function tempVis(data) {
     d3.select('#chart').selectAll('*').remove();
     let XMIN = data[0].Time
-    let XMAX = data.length-1
+    let XMAX = data.length - 1
     console.log('max ' + XMAX)
     let MAXTEMP = 0
     let MINTEMP = 0
@@ -33,8 +33,8 @@ function tempVis(data) {
     })
 
     const svg = d3.select('#chart')
-        .append('div')
-        .attr('class','fade-efect')
+        .append('section')
+        .attr('class', 'fade-efect')
         .append('svg')
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
@@ -64,15 +64,15 @@ function tempVis(data) {
 
     //create line
     var line = d3.line()
-        .x(function (d, i) { return xScale(d.Time); }) 
-        .y(function (d) { return yScale(d.temp); })  
-        .curve(d3.curveMonotoneX) 
+        .x(function(d, i) { return xScale(d.Time); })
+        .y(function(d) { return yScale(d.temp); })
+        .curve(d3.curveMonotoneX)
 
     //add line to chart
     svg.append('path')
-        .datum(data) 
-        .attr('class', 'line') 
-        .attr('d', line);  
+        .datum(data)
+        .attr('class', 'line')
+        .attr('d', line);
 
     //create area
     const area = d3
@@ -112,9 +112,9 @@ function tempVis(data) {
 
     //append title
     svg.append('text')
-        .attr('x', 220)             
+        .attr('x', 220)
         .attr('y', -6)
-        .attr('text-anchor', 'middle')  
+        .attr('text-anchor', 'middle')
         .style('font-size', '15px')
         .text('Temperatura do ar (t)');
 
@@ -178,9 +178,10 @@ function tempVis(data) {
             height = parseInt(svg.style('height'), 10),
             aspect = width / height;
         svg.attr('viewBox', `0 0 ${width} ${height}`).
-            attr('preserveAspectRatio', 'xMinYMid').
-            call(resize);
+        attr('preserveAspectRatio', 'xMinYMid').
+        call(resize);
         d3.select(window).on('resize.' + container.attr('id'), resize);
+
         function resize() {
             const targetWidth = parseInt(container.style('width'));
             svg.attr('width', targetWidth);
